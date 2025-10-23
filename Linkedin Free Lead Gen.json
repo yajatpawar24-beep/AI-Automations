@@ -1,0 +1,1733 @@
+{
+  "name": "Linkedin Free Lead Gen",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc27b2d9-8de7-43ca-a741-2d150084f78e",
+              "name": "currentStartIndex",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "fc552c57-4510-4f04-aa09-2294306d0d9f",
+              "name": "maxPages",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "1612c4f1-dd2f-4c06-90c5-34b08ea33510",
+              "name": "q",
+              "value": "={{ $json[\"position \"] }} {{ $json[\"niche\"] }} {{ $json[\"location \"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        704
+      ],
+      "id": "ccd08214-7f5a-495c-ab88-b633057fb9ba",
+      "name": "Set Fields2"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/customsearch/v1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key"
+            },
+            {
+              "name": "cx",
+              "value": "73ec768218b5b4da0"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.q }} site:linkedin.com/in "
+            },
+            {
+              "name": "start",
+              "value": "={{ $runIndex == 0 ? $node[\"Set Fields2\"].json.currentStartIndex : $node[\"Pagination Check2\"].json.startIndex }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        704
+      ],
+      "id": "f7dfc16e-60f8-49ad-ab49-eff50b5eb3d4",
+      "name": "Search Google2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the response data\nconst response = $input.first().json;\nconst items = response.items || [];\n\n// Track pagination info\nlet nextStartIndex = 1;\nif (response.queries && response.queries.nextPage && response.queries.nextPage[0]) {\n  nextStartIndex = response.queries.nextPage[0].startIndex;\n}\n\n// Calculate if we should continue (Google only allows up to 100 results)\nconst hasMoreResults = nextStartIndex <= 100;\n\n// Process the items and include pagination info in each item\nconst results = items.map(item => {\n  const titleParts = item.title.split(\" - \");\n  return {\n    name: titleParts[0] || null,\n    title: titleParts.slice(1).join(\" - \") || null,\n    link: item.link || null,\n    snippet: item.snippet || null,\n    image: item.pagemap?.cse_thumbnail?.[0]?.src || null,\n    // Add pagination info to each item\n    startIndex: nextStartIndex,\n    hasMoreResults: hasMoreResults\n  };\n});\n\n// If there are no results, return at least one item with pagination info\nif (results.length === 0) {\n  return [{ \n    json: {\n      name: null,\n      title: null,\n      link: null,\n      snippet: null,\n      image: null,\n      startIndex: nextStartIndex,\n      hasMoreResults: false\n    }\n  }];\n}\n\n// Return the processed results\nreturn results.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        864
+      ],
+      "id": "323b270d-2b58-43ec-b677-8dc9701d272b",
+      "name": "Extract Results2"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 509305630,
+          "mode": "list",
+          "cachedResultName": "people",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=509305630"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('extract specific details1').item.json.name }}",
+            "snippet": "={{ $('Extract Results2').item.json.snippet }}",
+            "image": "={{ $('Extract Results2').item.json.image }}",
+            "icebreaker": "={{ $json.icebreaker }}",
+            "datetime_added": "={{ $now }}",
+            "startIndex": "={{ $('extract specific details1').item.json.startIndex }}",
+            "hasMoreResults": "={{ $('extract specific details1').item.json.hasMoreResults }}",
+            "industry": "={{ $('get current q info3').item.json.niche }}",
+            "Analysed": "No"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin status",
+              "displayName": "linkedin status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Status",
+              "displayName": "Email Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "icebreaker",
+              "displayName": "icebreaker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Seniority",
+              "displayName": "Seniority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Analysed",
+              "displayName": "Analysed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Research Report",
+              "displayName": "Research Report",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#1 Body",
+              "displayName": "Email#1 Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#1 Subject",
+              "displayName": "Email#1 Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email #2 Body",
+              "displayName": "Email #2 Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#3 Body",
+              "displayName": "Email#3 Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#3 Subject",
+              "displayName": "Email#3 Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sender Email",
+              "displayName": "Sender Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time Zone",
+              "displayName": "Time Zone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#1 Sent",
+              "displayName": "Email#1 Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#2 Sent",
+              "displayName": "Email#2 Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email#3 Sent",
+              "displayName": "Email#3 Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message ID",
+              "displayName": "Message ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Replied",
+              "displayName": "Replied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Token",
+              "displayName": "Token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Opted Out",
+              "displayName": "Opted Out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image",
+              "displayName": "image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "startIndex",
+              "displayName": "startIndex",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hasMoreResults",
+              "displayName": "hasMoreResults",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "datetime_added",
+              "displayName": "datetime_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2144,
+        864
+      ],
+      "id": "9cedfc9d-8977-407a-8f96-bc7bb11814c1",
+      "name": "Add to Google2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "faef2862-80a4-465b-9e0b-be5b9753dcbd",
+              "leftValue": "={{ $json.continueLoop }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3296,
+        864
+      ],
+      "id": "491b29de-0bee-452d-afef-c08b4c07137e",
+      "name": "Pagination Check2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            },
+            {
+              "lookupColumn": "location ",
+              "lookupValue": "Melbourne"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        704
+      ],
+      "id": "c3003d69-d303-430b-9df3-d66d71378c30",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"icebreaker\":\"Icebreaker goes here\"}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        224
+      ],
+      "id": "f1c380ad-f0ae-40c1-942c-ad9b70d6a35d",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "description": "use this tool to check if the message is good, and something that would appeal to person realistically"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        224
+      ],
+      "id": "8872ab64-789e-4a64-8f32-9bf793e6541f",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=name: {{ $json.name }}\ntitle {{ $json.title }}\nsnippet: {{ $json.snippet }}\ncurrent industry: {{ $('Get row(s) in sheet1').item.json['niche '] }}\nlocation: {{ $('Get row(s) in sheet1').item.json['location '] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Final System Prompt\n\nYour task is to take as input LinkedIn-style fields about a person (name, title, snippet), along with their industry and location, and generate a **very short**, **punchy** icebreaker that fits this connection request style.\n\nReturn your results exactly in this JSON format:\n\n\n{\"icebreaker\":\"Icebreaker goes here\"}\n\n\nTemplate\n\nYou are behind. \nTemplate:\nHey {{name}}, I saw your {{thingAboutThem}} and it seemed like you guys could benefit from a PDF that’s been helping others in {{industry}} with {{specificBenefit}}. Want me to send it through?\n\nGuidelines:\n\nFor {{thingAboutThem}}, always paraphrase their LinkedIn info (e.g., current role, company, or journey). Never copy text verbatim.\n\nFor {{industry}}, pull from the provided “current industry” field and rewrite it naturally \n\nFor {{specificBenefit}}, flexibly choose something relevant to the industry (e.g., “scaling client outreach,” “streamlining hiring,” “cutting admin work,” etc.). Vary it so it doesn’t feel canned.\n\nKeep it laconic and conversational, not salesy. This should feel like a DM, not a pitch.\n\n# Example Input (your lead)\n\nname: Vic McLaren\ntitle: Practice Manager at Dental Boutique Mornington ...\nsnippet: Practice Manager at Dental Boutique Mornington · Experience: Dental Boutique Melbourne · Education: Rhodes College · Location: Melbourne · 283 connections ...\ncurrent industry: Dentist\nlocation: Melbourne\n\n\n#\n\n\n{\"icebreaker\":\"You are behind. \\n Hey Vic, saw you running ops at Dental Boutique Mornington—got a short PDF helping others in the dental space reduce no-shows and tighten scheduling. Want me to send it through?\"}\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e470383e-f9f3-4094-a9c3-7cd83e7c5531",
+      "name": "connection message1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3072,
+        656
+      ],
+      "id": "3f2f5969-c9c1-42b3-add3-03769f192d3e",
+      "name": "Wait3",
+      "webhookId": "bc9974b0-5ca7-4453-83bc-eb0b5a33f92a"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        704
+      ],
+      "id": "2fe98e08-3535-453a-831c-0bbc6f5a98a2",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1728,
+        864
+      ],
+      "id": "a919f2f6-7be0-4ac2-a6e9-6324de4212a0",
+      "name": "get current q info3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9bc0d2a-fcf8-495c-8a7f-2fa6e6c9b924",
+              "name": "=icebreaker",
+              "value": "=You are behind. Hey {{ $('extract specific details1').item.json.firstName }}, this PDF has helped hundreds of {{ $json.niche }} businesses use AI to cut repetitive work. Want me to send it through?",
+              "type": "string"
+            },
+            {
+              "id": "7a555573-c564-4ead-a6e9-7167e156000d",
+              "name": "industry ",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        864
+      ],
+      "id": "26d45c53-1bf8-4c64-a3aa-82c3b21b529f",
+      "name": "set icebreaker1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3520,
+        864
+      ],
+      "id": "b04379eb-dbb5-48e9-9d6f-0db33fc14b2d",
+      "name": "get current q request1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{$json[\"id\"]}}",
+            "status": "retrieved ",
+            "date completed": "={{ $now }}",
+            "total leads searched": "={{ [$('Pagination Check2').item.json.startIndex]-1 }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "position ",
+              "displayName": "position ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "niche",
+              "displayName": "niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "location ",
+              "displayName": "location ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "company size(can leave blank)",
+              "displayName": "company size(can leave blank)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total leads searched",
+              "displayName": "total leads searched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total new leads",
+              "displayName": "total new leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date completed",
+              "displayName": "date completed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3744,
+        864
+      ],
+      "id": "dd3f8150-a3b4-4780-9e61-db9d1c7847d8",
+      "name": "update query status1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 509305630,
+          "mode": "list",
+          "cachedResultName": "people",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=509305630"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        624
+      ],
+      "id": "3711f53c-4df7-42d3-8135-8b0d27c1d7e1",
+      "name": "see if already exist1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1504,
+        864
+      ],
+      "id": "feca840e-622e-4136-905b-1afea4fa97f7",
+      "name": "Wait4",
+      "webhookId": "a2b47ac1-3e5b-420d-a8a6-0a066fdcdf14"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "date completed": "={{ $now }}",
+            "total new leads": "={{ Number([$json[\"total new leads\"]]) + $('count amount of new leads1').item.json.count_name}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "position ",
+              "displayName": "position ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "niche",
+              "displayName": "niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "location ",
+              "displayName": "location ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "company size(can leave blank)",
+              "displayName": "company size(can leave blank)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total leads searched",
+              "displayName": "total leads searched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total new leads",
+              "displayName": "total new leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date completed",
+              "displayName": "date completed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2848,
+        864
+      ],
+      "id": "4fc4a9e9-f1b1-4a5c-a12d-1863a39dd3b5",
+      "name": "update amount added1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2624,
+        864
+      ],
+      "id": "16e0e1a7-92f4-401d-932b-4be798de18c3",
+      "name": "get current q info4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "link",
+              "field2": "link"
+            }
+          ]
+        },
+        "resolve": "preferInput2",
+        "options": {
+          "skipFields": "datetime_added, icebreaker, row_number, index, results"
+        }
+      },
+      "type": "n8n-nodes-base.compareDatasets",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        688
+      ],
+      "id": "fce6daaf-d359-4a8c-97ab-d6320fd64d52",
+      "name": "Compare Datasets1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node (JavaScript)\n// Robustly adds: json.firstName, json.business, json.parseConfidence\n// Handles missing/undefined fields safely.\n\nfunction S(v) {\n  // Always return a string; never undefined/null\n  if (v === undefined || v === null) return \"\";\n  return (typeof v === \"string\") ? v : String(v);\n}\n\nfunction T(v) {\n  return S(v).trim();\n}\n\nfunction pick(obj, keys) {\n  for (const k of keys) {\n    const val = T(obj?.[k]);\n    if (val) return val;\n  }\n  return \"\";\n}\n\nfunction firstNameFrom(fullName = \"\") {\n  let s = T(fullName);\n  if (!s) return \"\";\n\n  // \"Last, First\" -> \"First Last\"\n  if (s.includes(\",\")) {\n    const parts = s.split(\",\").map(p => T(p)).filter(Boolean);\n    if (parts.length >= 2) s = `${parts[1]} ${parts[0]}`;\n  }\n\n  // strip common titles/suffixes\n  s = S(s)\n    .replace(/\\b(Dr|Mr|Ms|Mrs|Prof)\\.?\\b/ig, \"\")\n    .replace(/\\b(Jr|Sr|II|III|IV|PhD|MD|MBA)\\b\\.?/ig, \"\")\n    .replace(/\\s{2,}/g, \" \")\n    .trim();\n\n  return s.split(/\\s+/)[0] || \"\";\n}\n\nfunction stripEmojiAndPunctStart(s = \"\") {\n  return S(s).replace(/^[^\\p{L}\\p{N}]+/u, \"\").trim();\n}\n\nfunction trimRoleTail(phrase = \"\") {\n  const tails = [\n    \"Practice Management\", \"Practice Manager\", \"Marketing\", \"Sales\",\n    \"Engineering\", \"Operations\", \"Consulting\", \"Consultant\",\n    \"Manager\", \"Director\", \"Specialist\", \"Coordinator\", \"Assistant\",\n    \"Head\", \"Lead\"\n  ];\n  let p = T(phrase);\n  for (const t of tails) {\n    const re = new RegExp(`\\\\b${t}\\\\b\\\\s*$`, \"i\");\n    if (re.test(p)) {\n      p = p.replace(re, \"\").trim();\n      break;\n    }\n  }\n  return p.replace(/\\s{2,}/g, \" \").trim();\n}\n\nfunction extractCompanyFromTitle(raw = \"\") {\n  const title = stripEmojiAndPunctStart(T(raw).replace(/\\u2026|\\.\\.\\.$/g, \"\"));\n  if (!title) return { company: \"\", confidence: 0 };\n\n  // 1) \" at \" / \" @ \" / \" of \"\n  let m = title.match(/\\b(?:at|@)\\b\\s*([A-Z][\\w&'.()/-]*(?:\\s+[A-Z0-9][\\w&'.()/-]*)*)/i);\n  if (m) return { company: T(m[1]), confidence: 0.95 };\n\n  m = title.match(/\\b(?:of)\\b\\s*([A-Z][\\w&'.()/-]*(?:\\s+[A-Z0-9][\\w&'.()/-]*)*)/i);\n  if (m) return { company: T(m[1]), confidence: 0.82 };\n\n  // 2) Role – sep – Company  OR  Company – sep – Role\n  const sep = \"[–—-]|\\\\||·|•|,|:\";\n  const reAfter = new RegExp(`^[^${sep}]+(?:${sep})\\\\s*([A-Z][A-Za-z0-9&'.()/-]*(?:\\\\s+[A-Z0-9][A-Za-z0-9&'.()/-]*)*)$`);\n  const reBefore = new RegExp(`^([A-Z][A-Za-z0-9&'.()/-]*(?:\\\\s+[A-Z0-9][A-Za-z0-9&'.()/-]*)*)(?:\\\\s*${sep}\\\\s*)[^${sep}]+$`);\n  m = title.match(reAfter);\n  if (m) return { company: T(m[1]), confidence: 0.75 };\n  m = title.match(reBefore);\n  if (m) return { company: T(m[1]), confidence: 0.72 };\n\n  // 3) Parentheses\n  m = title.match(/\\(([^)]+)\\)/);\n  if (m && /[A-Za-z]/.test(S(m[1]))) return { company: T(m[1]), confidence: 0.65 };\n\n  // 4) Fallback: leading capitalized chunk, then trim role tails\n  const lead = title.match(/^([A-Z][\\w&'.()/-]*(?:\\s+[A-Z][\\w&'.()/-]*){0,7})/);\n  if (lead) {\n    const guess = trimRoleTail(lead[1]);\n    if (guess) return { company: guess, confidence: 0.55 };\n  }\n\n  return { company: \"\", confidence: 0 };\n}\n\nfunction extractCompanyFromSnippet(snippet = \"\") {\n  const s = T(snippet).replace(/\\u00b7/g, \"·\");\n  if (!s) return { company: \"\", confidence: 0 };\n\n  // Experience: <Company> …\n  let m = s.match(/Experience:\\s*([^·\\n,]+(?: [A-Z][^·\\n,]+)*)/i);\n  if (m) return { company: T(m[1]), confidence: 0.9 };\n\n  // Works/Worked at <Company>\n  m = s.match(/\\bWorks? (?:at|with)\\s+([^·\\n,]+(?: [A-Z][^·\\n,]+)*)/i);\n  if (m) return { company: T(m[1]), confidence: 0.85 };\n\n  // Try to capture a recent company line like \"818 Dental. Nov 2022 - ...\"\n  m = s.match(/([A-Z][A-Za-z0-9&'.()/-]*(?:\\s+[A-Z0-9][A-Za-z0-9&'.()/-]*)*)\\.\\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{4}\\s+-/);\n  if (m) return { company: T(m[1]), confidence: 0.75 };\n\n  // Role ... at <Company>\n  m = s.match(/\\b(Manager|Director|Engineer|Consultant|Founder|CEO|COO|CFO|Head|Lead|Partner|Owner)\\b.*?\\bat\\s+([^·\\n,]+(?: [A-Z][^·\\n,]+)*)/i);\n  if (m) return { company: T(m[2]), confidence: 0.8 };\n\n  // Weak fallback: \"for <Company>\"\n  m = s.match(/\\bfor\\s+([A-Z][A-Za-z0-9&'.()/-]*(?:\\s+[A-Z0-9][A-Za-z0-9&'.()/-]*)*)/);\n  if (m) return { company: T(m[1]), confidence: 0.45 };\n\n  return { company: \"\", confidence: 0 };\n}\n\nfunction extractBusiness(j) {\n  // direct fields first\n  const direct = pick(j, [\"company\", \"business\", \"organization\", \"employer\", \"org\", \"currentCompany\"]);\n  if (direct) return { company: direct, confidence: 1 };\n\n  // title/headline\n  const titleLike = pick(j, [\"title\", \"headline\", \"jobTitle\", \"role\", \"position\"]);\n  const fromTitle = extractCompanyFromTitle(titleLike);\n  if (fromTitle.company) return fromTitle;\n\n  // snippet/bio\n  const snippetLike = pick(j, [\"snippet\", \"bio\", \"summary\", \"about\"]);\n  const fromSnippet = extractCompanyFromSnippet(snippetLike);\n  if (fromSnippet.company) return fromSnippet;\n\n  return { company: \"\", confidence: 0 };\n}\n\nreturn items.map(item => {\n  const j = item?.json ?? {};\n  const fullName = pick(j, [\"name\", \"fullName\", \"FullName\", \"personName\"]);\n  const firstName = firstNameFrom(fullName);\n\n  const { company, confidence } = extractBusiness(j);\n\n  return {\n    json: {\n      ...j,\n      firstName,\n      business: company,\n      parseConfidence: confidence\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        864
+      ],
+      "id": "ee697958-c1ec-4cbb-87bc-9b86ca42c1f2",
+      "name": "extract specific details1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2320,
+        640
+      ],
+      "id": "c4f08ace-00a3-432a-9f45-dd5633952d2f",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/customsearch/v1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key"
+            },
+            {
+              "name": "cx",
+              "value": "73ec768218b5b4da0"
+            },
+            {
+              "name": "q",
+              "value": "={{ $node[\"get next index1\"].json.q }} site:linkedin.com/in "
+            },
+            {
+              "name": "start",
+              "value": "={{ $runIndex == 0 ? $node[\"Set Fields2\"].json.currentStartIndex : $node[\"Pagination Check2\"].json.startIndex }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        912
+      ],
+      "id": "22783d24-746e-4b6e-bc0e-2fcadc69b7f7",
+      "name": "Search Google next page1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        656
+      ],
+      "id": "dea9bee2-9680-4145-8cdd-e87e19f525b6",
+      "name": "take first input1"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        864
+      ],
+      "id": "fea0e38d-3bcc-4a46-a19b-34ca90a662a1",
+      "name": "count amount of new leads1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc",
+          "mode": "list",
+          "cachedResultName": "Linkedin leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1599491094,
+          "mode": "list",
+          "cachedResultName": "lead request",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbK9BZg1yOzBWHgv3YO-mwsjUDyCilQ6yw2It44y7Vc/edit#gid=1599491094"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2688,
+        656
+      ],
+      "id": "70bd240b-a8b6-46e3-a328-3bfaef26476b",
+      "name": "get current q info5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1faaf08-e10f-4c1c-b528-f40a8ccdf590",
+              "name": "continueLoop",
+              "value": "={{ $('take first input1').item.json.hasMoreResults }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7a3b4fb6-ceb4-47e6-bc20-809fdd255f97",
+              "name": "startIndex",
+              "value": "={{ $('take first input1').item.json.startIndex }}",
+              "type": "number"
+            },
+            {
+              "id": "5f76028e-53fd-4f46-9441-ed8977ce41bc",
+              "name": "q",
+              "value": "={{ $json[\"position \"] }} {{ $json[\"niche\"] }} {{ $json[\"location \"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2864,
+        656
+      ],
+      "id": "17ba408a-6d14-4824-9741-49e2a7ceee6b",
+      "name": "get next index1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        208
+      ],
+      "id": "f4d59701-f925-4a47-a663-a6f84bd33ba9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "N7WagFMxRo3eQyCO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        128,
+        432
+      ],
+      "id": "449fdfdc-1eae-420d-8d06-7a52e4b8251c",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "N7WagFMxRo3eQyCO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger1": [
+      {
+        "json": {
+          "timestamp": "2025-10-06T00:00:07.083-04:00",
+          "Readable date": "October 6th 2025, 12:00:07 am",
+          "Readable time": "12:00:07 am",
+          "Day of week": "Monday",
+          "Year": "2025",
+          "Month": "October",
+          "Day of month": "06",
+          "Hour": "00",
+          "Minute": "00",
+          "Second": "07",
+          "Timezone": "America/New_York (UTC-04:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Set Fields2": {
+      "main": [
+        [
+          {
+            "node": "Search Google2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Google2": {
+      "main": [
+        [
+          {
+            "node": "Extract Results2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "see if already exist1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Results2": {
+      "main": [
+        [
+          {
+            "node": "Compare Datasets1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add to Google2": {
+      "main": [
+        [
+          {
+            "node": "count amount of new leads1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Pagination Check2": {
+      "main": [
+        [
+          {
+            "node": "Search Google next page1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "get current q request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Set Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "connection message1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "connection message1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Pagination Check2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get current q info3": {
+      "main": [
+        [
+          {
+            "node": "set icebreaker1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set icebreaker1": {
+      "main": [
+        [
+          {
+            "node": "Add to Google2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get current q request1": {
+      "main": [
+        [
+          {
+            "node": "update query status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "see if already exist1": {
+      "main": [
+        [
+          {
+            "node": "Compare Datasets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "get current q info3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get current q info4": {
+      "main": [
+        [
+          {
+            "node": "update amount added1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare Datasets1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "extract specific details1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract specific details1": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "take first input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Google next page1": {
+      "main": [
+        [
+          {
+            "node": "see if already exist1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Results2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "take first input1": {
+      "main": [
+        [
+          {
+            "node": "get current q info5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "count amount of new leads1": {
+      "main": [
+        [
+          {
+            "node": "get current q info4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get current q info5": {
+      "main": [
+        [
+          {
+            "node": "get next index1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get next index1": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "connection message1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "98c81b63-e2cc-4de9-b84e-4983bcc1b7e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9b6731c39c7f8a03937be8368e744afc011b74830bd480757681f0a2164d3e1"
+  },
+  "id": "Ou4vjKjfAkPXZRoY",
+  "tags": []
+}

@@ -1,0 +1,717 @@
+{
+  "name": "Followup(ainovatesolutions@wwwainovate.com)",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1PO4m4W4NtadUKSQ3C0kMxaY30JOtuiLfXQuMr1yMa6Q",
+          "mode": "list",
+          "cachedResultName": "Dental Clinics Apollo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PO4m4W4NtadUKSQ3C0kMxaY30JOtuiLfXQuMr1yMa6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2100162289,
+          "mode": "list",
+          "cachedResultName": "Sheet3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PO4m4W4NtadUKSQ3C0kMxaY30JOtuiLfXQuMr1yMa6Q/edit#gid=2100162289"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -1008,
+        480
+      ],
+      "id": "6f9b1742-6e9e-4f39-9e9c-f03b8a0db5ff",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fdc40194-662b-402b-b731-6405ce91259e",
+              "leftValue": "={{ $json[\"Send Status\"] }}",
+              "rightValue": "SENT",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c706e8db-8491-4a23-a201-b9136e758b03",
+              "leftValue": "={{ $json['Followup 1'] }}",
+              "rightValue": "SENT",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -784,
+        480
+      ],
+      "id": "bd58c9a0-1bc5-4351-9263-35105ee09668",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -560,
+        464
+      ],
+      "id": "81f01a0f-42a0-4565-8522-2bf2b49a2b21",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        368
+      ],
+      "id": "694a65b4-321a-4d9f-bf25-f74333db65ae",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Emails }}",
+        "subject": "={{ $json.output.Subject }}",
+        "message": "={{ $json.output['Email Body'] }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Yajat"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        448
+      ],
+      "id": "14b88f94-bef8-4d93-b17a-7eba0e4de2a6",
+      "name": "Gmail",
+      "webhookId": "3fbf6bf1-efca-44a5-8ed0-8e0fb1d4143f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MrldSTg4FmDewUJp",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        768,
+        304
+      ],
+      "id": "e31974d3-e691-4a8f-b4f1-ab636c10779d",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1PO4m4W4NtadUKSQ3C0kMxaY30JOtuiLfXQuMr1yMa6Q",
+          "mode": "list",
+          "cachedResultName": "Dental Clinics Apollo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PO4m4W4NtadUKSQ3C0kMxaY30JOtuiLfXQuMr1yMa6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2100162289,
+          "mode": "list",
+          "cachedResultName": "Sheet3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PO4m4W4NtadUKSQ3C0kMxaY30JOtuiLfXQuMr1yMa6Q/edit#gid=2100162289"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Send Status": "={{ $json.labelIds[0] }}",
+            "Job title": "={{ $json[\"Job title\"] }}",
+            "Company": "={{ $json.Company }}",
+            "Emails": "={{ $json.Emails }}",
+            "Phone numbers": "={{ $json[\"Phone numbers\"] }}",
+            "Actions": "={{ $json.Actions }}",
+            "Links": "={{ $json.Links }}",
+            "Location": "={{ $json.Location }}",
+            "Company · Number of employees": "={{ $json[\"Company · Number of employees\"] }}",
+            "Company · Industries": "={{ $json[\"Company · Industries\"] }}",
+            "Company · Keywords": "={{ $json[\"Company · Keywords\"] }}",
+            "Followup 1": "SENT"
+          },
+          "matchingColumns": [
+            "Emails"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Job title",
+              "displayName": "Job title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Emails",
+              "displayName": "Emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone numbers",
+              "displayName": "Phone numbers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Actions",
+              "displayName": "Actions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Links",
+              "displayName": "Links",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company · Number of employees",
+              "displayName": "Company · Number of employees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company · Industries",
+              "displayName": "Company · Industries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company · Keywords",
+              "displayName": "Company · Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Send Status",
+              "displayName": "Send Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Followup 1",
+              "displayName": "Followup 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Followup 2",
+              "displayName": "Followup 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        992,
+        304
+      ],
+      "id": "74d1d5c3-4196-47ff-a808-72ef7bfa50b3",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        560
+      ],
+      "id": "0666bda1-439a-43a9-8f14-04d6ac8011e0",
+      "name": "Wait",
+      "webhookId": "59d0e464-9eef-4147-9d07-e283193ed822"
+    },
+    {
+      "parameters": {
+        "content": "## Log The Status",
+        "height": 280,
+        "width": 300
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        912,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "a9973f2d-0aa8-4240-8c5c-903fe80bebac",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a cold email followups specialist. My Agency name is AInovate Solutions. We provide AI solutions for Medical Clinics. I want to construct the best cold email followup ever to attract clients for me. We have already sent the first wave of emails. Here is a sample cold email followup-\n\nSubject: A thought on reducing burnout at [Clinic Name]\n\nHi Dr. [Last Name],\n\nI can only imagine how much of your day is spent on administrative tasks rather than on what truly matters—your patients.\n\nWhat if you could reclaim a significant portion of that time?\n\nAt AInovate Solutions, we help medical practices like yours leverage specialized AI to streamline operations. We're helping our clients automate tasks like scheduling, patient communication, and documentation, leading to:\n\nUp to an 80% increase in efficiency\n\nDozens of hours saved per week\n\nA noticeable reduction in team burnout\n\nWould you be open to a brief 10-minute chat next week to explore how this could apply to you?\n\nAll the best,\n\nYajat Pawar\nFounder, AInovate Solutions\nhttps://wwwainovate.com\n\nYou will be given the name of the person- {{ $json.Name }}\nCompany-{{ $json.Company }}\nLinkedin-{{ $json.Links }}\n\nProvide a short and sweet cold email followup. It should be concise and should provide only short details.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        48
+      ],
+      "id": "e95a1855-0cf1-42c8-9862-7788ff56d018",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        240
+      ],
+      "id": "db92bfbf-0eaa-4295-a2be-5e3011780b9f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "N7WagFMxRo3eQyCO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Subject",
+              "description": "Subject of the Email",
+              "required": true
+            },
+            {
+              "name": "Email Body",
+              "description": "Body of the email",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nExtract the subject of the email and body of the email seperately."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2d2cad0f-137f-4da7-9430-25e05a73abed",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "396cd00d-208b-494b-9be2-0cc9879bfc40",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "N7WagFMxRo3eQyCO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  item.json.output[\"Email Body\"] = item.json.output[\"Email Body\"].replace(\n    /\\n/g,\n    \"<br>\",\n  );\n  return item;\n});\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        160
+      ],
+      "id": "eea13b6d-4da8-40df-ba28-a05bb939bf51",
+      "name": "Code"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        416
+      ],
+      "id": "f4a7c53a-eb0c-46d9-83a8-5a637ae3a6bb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "07b59839-0fc8-480b-9e20-cdadd8555409",
+              "leftValue": "={{ $json.Emails }}",
+              "rightValue": "No email",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "dc7c94bc-5beb-44c9-8a7f-45a38f01a0dc",
+              "leftValue": "={{ $json.Emails }}",
+              "rightValue": "No emails",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        496
+      ],
+      "id": "5818f674-bc39-49b3-af97-c9fc684071e4",
+      "name": "If1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fb031851-49fa-48cc-981a-8d4becd11d02",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9b6731c39c7f8a03937be8368e744afc011b74830bd480757681f0a2164d3e1"
+  },
+  "id": "NojqHf2i7Y0QQUci",
+  "tags": []
+}

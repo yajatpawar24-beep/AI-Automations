@@ -1,0 +1,364 @@
+{
+  "name": "AInovate Solutions Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the website chatbot for AInovate Solutions. Your job is to answer to the user question- {{ $json.chatInput }} .\nYou should always reply in natural language. You are given many tools to support you!\nThe current date is {{ $now.format('yyyy-MM-DD') }}\nYou are in the Asia/Kolkata (IST) timezone.\n\n1) http request tool- this tool helps you to analyse my website and then provide the most suitable answers to the question. Just to give a brief overview, my agency helps customers reduce manual workloads and increase efficiency by upto 80% using AI Automation.\n\n2)Google Calender tools- Use these tools if a person wants to book a meeting. Ask their name,phone number, email address and chief concern. Make sure to ask these one by one, do not ask all questions at once.\n\nOnce all details are received, proceed to provide suitable timings out of my calender.\nLet them choose the timings and book the meeting in my calender.\n\nIf a person wishes to contact me, provide the following email- ainovatesolutions@wwwainovate.com.\n\nYou have to be a master at recognizing intent.\n\nAnswer all the questions professionally. Make sure to use http request for all questions except when they want to schedule a meeting. You are given the httpe request node, please use it.\n\nAlso make sure to provide suitable timings to the user. If any meeting is already present during preferred date, tell them to switch to another time.\n\n3)You have also been given the gmail tool, make sure to send the meeting invite to the given email.\nMake sure to send the email to the email address provided to you in the end.\n\nImportant-\nThe Phone number should always be of 10 digits. No more,no less. If it exceeds or goes below 10 digits, ask them to submit number again.\nThe email should always end with @gmail.com,@yahoo.com,outlook.com or @company.com.\nIf not, ask user to enter mail again.\n\nAlso make sure, if the person books a meeting, store all information in google sheets.\n",
+        "options": {
+          "systemMessage": "You are a helpful assistant. "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        -288
+      ],
+      "id": "0154f824-1c19-4599-8ff3-cf2ee6bbc627",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "dc32582c-887e-4517-b1e7-1521ef9065d1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "N7WagFMxRo3eQyCO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ainovatesolutions@wwwainovate.com",
+          "mode": "list",
+          "cachedResultName": "ainovatesolutions@wwwainovate.com"
+        },
+        "start": "={{ $fromAI(\"BeforeDate\") }}",
+        "end": "={{ $fromAI(\"AfterDate\") }}",
+        "useDefaultReminders": "={{ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "allday": "yes",
+          "attendees": [],
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "location": "Pune,Maharashtra",
+          "sendUpdates": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "d27d2978-96a6-49de-880f-b1425b9f9e3f",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "FyhfpxxQxS5Y8pZm",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -544,
+        -272
+      ],
+      "id": "115d105e-d889-43f1-acf9-53a063d555e0",
+      "name": "When chat message received",
+      "webhookId": "09bf2283-9b05-454d-b5c2-7ec801496332"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        112
+      ],
+      "id": "d8096460-f1ae-4117-a7b1-8118201a624a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "url": "https://wwwainovate.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        -16
+      ],
+      "id": "35ea1873-3be4-4175-a029-07918a6c6f45",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "ainovatesolutions@wwwainovate.com",
+          "mode": "list",
+          "cachedResultName": "ainovatesolutions@wwwainovate.com"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMin": "={{ $fromAI(\"AfterDate\") }}",
+        "timeMax": "={{ $fromAI(\"BeforeDate\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        0
+      ],
+      "id": "d948c58d-ce0e-41dd-9804-b18d10088664",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "FyhfpxxQxS5Y8pZm",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        -32
+      ],
+      "id": "258f496a-526b-4bc1-87b7-21df403d03a0",
+      "name": "Send a message in Gmail",
+      "webhookId": "f9ba5dc0-98a5-43f7-a9b0-a6f2f5c03019",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FDjI1jhgr82xNV51",
+          "name": "Gmail account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1bxBSquOghhndZIdJinfa7Sk2uhzPFVH6U98DO__npoA",
+          "mode": "list",
+          "cachedResultName": "Website Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bxBSquOghhndZIdJinfa7Sk2uhzPFVH6U98DO__npoA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bxBSquOghhndZIdJinfa7Sk2uhzPFVH6U98DO__npoA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+            "Phone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Chief Concern": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chief_Concern', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Chief Concern",
+              "displayName": "Chief Concern",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -48
+      ],
+      "id": "25814b1a-8396-4fbd-8b49-d9697019c2a0",
+      "name": "Append or update row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wLAff22iDAlkjMYe",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "025ac299-94e4-4dac-bc29-afaecc45dc78",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9b6731c39c7f8a03937be8368e744afc011b74830bd480757681f0a2164d3e1"
+  },
+  "id": "ncTY9qvTK0986Wuk",
+  "tags": []
+}
